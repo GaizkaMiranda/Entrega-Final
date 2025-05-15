@@ -1,0 +1,29 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+    volumes:
+      - ./mqtt_client/certificates:/mosquitto/config/certs
+
+  influxdb:
+    image: influxdb:2.6
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      # token, org, bucket…
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+
+  api:
+    build: ./api
+    env_file: ./api/.env
+    depends_on:
+      - mosquitto
+      - influxdb
+    command: tail -f /dev/null  # mantiene el contenedor vivo
